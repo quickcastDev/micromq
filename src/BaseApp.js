@@ -1,5 +1,5 @@
 const methods = require('methods');
-const pathToRegex = require('path-to-regexp');
+const pathToRegex = require('path-to-regexp').pathToRegexp;
 const prometheus = require('prom-client');
 const RabbitApp = require('./RabbitApp');
 const RpcActions = require('./managers/RpcActions');
