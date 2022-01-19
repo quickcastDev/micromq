@@ -1,4 +1,4 @@
-const nanoid = require('nanoid');
+const { nanoid } = require('nanoid');
 const BaseApp = require('./BaseApp');
 const RabbitApp = require('./RabbitApp');
 const Response = require('./Response');

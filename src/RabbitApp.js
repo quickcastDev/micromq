@@ -1,6 +1,6 @@
 const amqplib = require('amqplib');
 const debug = require('./utils/debug')('micromq-rabbit');
-const nanoid = require('nanoid');
+const { nanoid } = require('nanoid');
 
 class RabbitApp {
   constructor(options) {

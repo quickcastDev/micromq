@@ -1,4 +1,4 @@
-const nanoid = require('nanoid');
+const { nanoid } = require('nanoid');
 const RabbitApp = require('./RabbitApp');
 const Server = require('./Server');
 const debug = require('./utils/debug')('micromq-gateway');
