@@ -19,10 +19,9 @@ class RabbitApp {
   }
 
   get queuePidName() {
-    // return `${this.responsesQueueName}-${process.pid}`;
-    const requestId = nanoid();
-    return `${this.responsesQueueName}-${requestId}`;
-
+    return `${this.responsesQueueName}-${process.pid}`;
+    // const requestId = nanoid();
+    // return `${this.responsesQueueName}-${requestId}`;
   }
 
   async createConnection() {
