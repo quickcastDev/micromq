@@ -24,17 +24,31 @@ class RabbitApp {
     // return `${this.responsesQueueName}-${requestId}`;
   }
 
+async sleep (ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
   async createConnection() {
     if (!this.connection) {
       debug(() => 'creating connection');
 
-      this.connection = await amqplib.connect(this.options.rabbit.url);
+      let _this = this
+      while(!this.connection) {
+        try {
+            _this.connection = await amqplib.connect(this.options.rabbit.url);
+        } catch (e) {
+            debug(() => 'AMQ connection error ' + e.message);
+            _this.connection = null
+            await _this.sleep(3000);
+        }
+      }
 
       ['error', 'close'].forEach((event) => {
         this.connection.on(event, err => {
-          debug(() => 'creating connection ${err}');
+          debug(() => 'release connection ' + JSON.stringify(err));
           this.connection = null;
-          this.createConnection();
         });
       });
     }
@@ -43,10 +57,10 @@ class RabbitApp {
   }
 
   async createChannel(queueName, options) {
+    debug(() => `creating channel and asserting to ${queueName} queue`);
+
     const connection = await this.createConnection();
     const channel = await connection.createChannel();
-
-    debug(() => `creating channel and asserting to ${queueName} queue`);
 
     if (queueName) {
       await channel.assertQueue(queueName, options);
@@ -56,6 +70,8 @@ class RabbitApp {
   }
 
   async createResponsesChannel() {
+    debug(() => 'create response channel, connection = ' + JSON.stringify(!(this.connection === undefined || this.connection === null)));
+    debug(() => 'create response channel, response channel = ' + JSON.stringify(!(this.responsesChannel === undefined || this.responsesChannel === null)));
     if (!this.responsesChannel) {
       this.responsesChannel = await this.createChannel(this.responsesQueueName);
     }
@@ -64,6 +80,8 @@ class RabbitApp {
   }
 
   async createRequestsChannel() {
+    debug(() => 'create requests channel, connection = ' + JSON.stringify(!(this.connection === undefined || this.connection === null)));
+    debug(() => 'create requests channel, response channel = ' + JSON.stringify(!(this.requestsChannel === undefined || this.requestsChannel === null)));
     if (!this.requestsChannel) {
       this.requestsChannel = await this.createChannel(this.requestsQueueName);
     }

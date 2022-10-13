@@ -111,12 +111,26 @@ class MicroService extends BaseApp {
   }
 
   async start() {
+
+    debug(() => `create request channel ${this.requestsQueueName}`);
     const requestsChannel = await this.createRequestsChannel();
 
-    debug(() => `starting to consume ${this.requestsQueueName}`);
-
     // prepare responses channel before consume
+    debug(() => `create response channel ${this.requestsQueueName}`);
     await this.createResponsesChannel();
+
+    ['error', 'close'].forEach((event) => {
+      requestsChannel.on(event, async (err) => {
+        debug(() => 're-creating channels');
+        this.connection = null;
+        this.requestsChannel = null;
+        this.responsesChannel = null;
+        await this.sleep(3000)
+        this.start();
+      });
+    });
+
+    debug(() => `starting to consume ${this.requestsQueueName}`);
 
     requestsChannel.consume(this.requestsQueueName, async (message) => {
       const json = parseRabbitMessage(message);
